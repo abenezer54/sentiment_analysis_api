@@ -1,7 +1,11 @@
+import eventlet
+eventlet.monkey_patch()
+
 import os
 from flask import Flask
 from celery import Celery
 from config import config
+
 
 def create_celery(app):
     """Create and configure Celery instance"""
