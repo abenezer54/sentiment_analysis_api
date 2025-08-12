@@ -44,7 +44,7 @@ def analyze_topic():
             "job_id": job_id,
             "status": "pending",
             "message": "Analysis job created successfully"
-        }), 202
+        }), 202 
         
     except Exception as e:
         logger.error(f"Error creating analysis job: {str(e)}")
@@ -74,7 +74,6 @@ def get_analysis_results(job_id):
             "topic": analysis.topic,
             "created_at": analysis.created_at,
             "completed_at": analysis.completed_at,
-            "error_message": analysis.error_message
         }
         
         # Add result data if analysis is completed
@@ -87,8 +86,15 @@ def get_analysis_results(job_id):
                 "total_tweets": analysis.result.total_tweets,
                 "analyzed_tweets": analysis.result.analyzed_tweets
             })
-        
-        return jsonify(response_data), 200
+            # Return 200 for successful analysis
+            return jsonify(response_data), 200
+        elif analysis.error_message:
+            # Return 422 for failed analysis with error details
+            response_data["error_message"] = analysis.error_message
+            return jsonify(response_data), 422
+        else:
+            # Return 202 for pending/processing analysis
+            return jsonify(response_data), 202
         
     except Exception as e:
         logger.error(f"Error retrieving analysis results: {str(e)}")

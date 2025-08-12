@@ -37,8 +37,7 @@ class TwitterRepositoryImpl(TwitterRepository):
             response = self.client.search_recent_tweets(
                 query=clean_topic,
                 max_results=min(max_tweets, 100),  # Twitter API v2 limit
-                tweet_fields=['created_at', 'author_id'],
-                language='en'
+                tweet_fields=['created_at', 'author_id']
             )
             
             if not response.data:
@@ -71,6 +70,12 @@ class TwitterRepositoryImpl(TwitterRepository):
         except tweepy.Unauthorized:
             logger.error("Twitter API authentication failed")
             raise Exception("Twitter API authentication failed")
+        except tweepy.BadRequest as e:
+            logger.error(f"Twitter API bad request: {str(e)}")
+            raise Exception(f"Twitter API bad request: {str(e)}")
+        except tweepy.TweepyException as e:
+            logger.error(f"Twitter API error: {str(e)}")
+            raise Exception(f"Twitter API error: {str(e)}")
         except Exception as e:
             logger.error(f"Error fetching tweets: {str(e)}")
             raise Exception(f"Failed to fetch tweets: {str(e)}")
