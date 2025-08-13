@@ -1,0 +1,20 @@
+version: "3.8"
+
+services:
+  api:
+    environment:
+      - FLASK_ENV=development
+      - FLASK_DEBUG=true
+    volumes:
+      - .:/app
+    command: python main.py
+
+  celery-worker:
+    volumes:
+      - .:/app
+    command: celery -A app.infrastructure.task_queue.tasks worker --loglevel=info --pool=eventlet
+
+  celery-beat:
+    volumes:
+      - .:/app
+    command: celery -A app.infrastructure.task_queue.tasks beat --loglevel=info
