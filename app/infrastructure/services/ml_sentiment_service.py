@@ -2,6 +2,7 @@ from transformers import pipeline
 from typing import List, Tuple
 import logging
 import torch
+import threading
 
 from ...domain.interfaces import SentimentService
 from config import config
@@ -11,18 +12,40 @@ logger = logging.getLogger(__name__)
 class MLSentimentService(SentimentService):
     """Machine Learning sentiment analysis service using Hugging Face transformers"""
     
+    _instance = None
+    _lock = threading.Lock()
+    _initialized = False
+    
+    def __new__(cls):
+        """Singleton pattern to ensure only one instance exists"""
+        if cls._instance is None:
+            with cls._lock:
+                if cls._instance is None:
+                    cls._instance = super(MLSentimentService, cls).__new__(cls)
+        return cls._instance
+    
     def __init__(self):
+        """Initialize the sentiment analysis pipeline only once"""
+        if not self._initialized:
+            with self._lock:
+                if not self._initialized:
+                    self._initialize_pipeline()
+                    self._initialized = True
+    
+    def _initialize_pipeline(self):
         """Initialize the sentiment analysis pipeline"""
         self.config = config['default']
         
         try:
+            logger.info(f"Initializing sentiment analysis model: {self.config.SENTIMENT_MODEL_NAME}")
+            
             # Initialize the sentiment analysis pipeline
             self.pipeline = pipeline(
                 "sentiment-analysis",
                 model=self.config.SENTIMENT_MODEL_NAME,
                 device=0 if torch.cuda.is_available() else -1  # Use GPU if available
             )
-            logger.info(f"Initialized sentiment analysis model: {self.config.SENTIMENT_MODEL_NAME}")
+            logger.info(f"Successfully initialized sentiment analysis model: {self.config.SENTIMENT_MODEL_NAME}")
             
         except Exception as e:
             logger.error(f"Failed to initialize sentiment analysis model: {str(e)}")

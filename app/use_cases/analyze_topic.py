@@ -5,7 +5,7 @@ from ..domain.services import AnalysisOrchestrator
 from ..infrastructure.repositories.twitter_repository import TwitterRepositoryImpl
 from ..infrastructure.repositories.analysis_db_repository import AnalysisDBRepository
 from ..infrastructure.services.ml_sentiment_service import MLSentimentService
-from ..infrastructure.task_queue.tasks import analyze_topic_task
+from flask import current_app
 import logging
 
 logger = logging.getLogger(__name__)
@@ -33,8 +33,9 @@ class AnalyzeTopicUseCase:
             # Create the analysis job in the database
             job_id = self.orchestrator.create_analysis_job(topic, max_tweets)
             
-            # Queue the background task
-            analyze_topic_task.delay(job_id, topic, max_tweets)
+            # Queue the background task using the Flask app's Celery instance
+            from ..infrastructure.task_queue.tasks import analyze_topic_task
+            current_app.celery.send_task('analyze_topic_task', args=[job_id, topic, max_tweets])
             
             logger.info(f"Created analysis job {job_id} for topic: {topic}")
             return job_id

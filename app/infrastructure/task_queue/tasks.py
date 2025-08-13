@@ -25,8 +25,9 @@ def analyze_topic_task(self, job_id: str, topic: str, max_tweets: int = 100):
         logger.info(f"Starting analysis task for job {job_id}, topic: {topic}")
         
         # Initialize repositories and services
+        # Note: MLSentimentService is now a singleton, so it won't reload the model
         twitter_repo = TwitterRepositoryImpl()
-        sentiment_service = MLSentimentService()
+        sentiment_service = MLSentimentService()  # This will reuse existing instance
         analysis_repo = AnalysisDBRepository()
         
         # Initialize orchestrator
