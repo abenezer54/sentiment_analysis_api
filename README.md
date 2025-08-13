@@ -56,7 +56,7 @@ The application follows Clean Architecture principles with the following layers:
 ### 1. Clone and Setup
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/abenezer54/sentiment_analysis_api.git
 cd sentiment_analysis_api
 ```
 
@@ -102,7 +102,7 @@ make up
 ### 1. Clone the repository
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/abenezer54/sentiment_analysis_api.git
 cd sentiment_analysis_api
 ```
 
